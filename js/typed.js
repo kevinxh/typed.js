@@ -43,7 +43,7 @@
         this.showCursor = this.isInput ? false : this.options.showCursor;
 
         // text content of element
-        this.elContent = this.attr ? this.el.attr(this.attr) : this.el.text()
+        this.elContent = this.attr ? this.el.attr(this.attr) : this.el.text();
 
         // html or plain text
         this.contentType = this.options.contentType;
@@ -65,6 +65,8 @@
 
         // input strings of text
         this.strings = this.options.strings;
+
+        this.findStopNum = this.options.findStopNum;
 
         // character number position of current string
         this.strPos = 0;
@@ -178,14 +180,14 @@
 
                 if (self.contentType === 'html') {
                     // skip over html tags while typing
-                    var curChar = curString.substr(curStrPos).charAt(0)
+                    var curChar = curString.substr(curStrPos).charAt(0);
                     if (curChar === '<' || curChar === '&') {
                         var tag = '';
                         var endTag = '';
                         if (curChar === '<') {
-                            endTag = '>'
+                            endTag = '>';
                         } else {
-                            endTag = ';'
+                            endTag = ';';
                         }
                         while (curString.substr(curStrPos).charAt(0) !== endTag) {
                             tag += curString.substr(curStrPos).charAt(0);
@@ -270,13 +272,14 @@
                 // on the first string, only delete one word
                 // the stopNum actually represents the amount of chars to
                 // keep in the current string. In my case it's 14.
-                // if (self.arrayPos == 1){
-                //  self.stopNum = 14;
-                // }
+                //if (self.arrayPos === 0){
+                //  console.log(self.stopNum);
+                //  self.stopNum = 49;
+                //}
                 //every other time, delete the whole typed string
-                // else{
-                //  self.stopNum = 0;
-                // }
+                //else{
+                //self.stopNum = 0;
+                //}
 
                 if (self.contentType === 'html') {
                     // skip over html tags while backspacing
@@ -294,6 +297,23 @@
                 // ----- continue important stuff ----- //
                 // replace text with base text + typed characters
                 var nextString = curString.substr(0, curStrPos);
+                if ( self.findStopNum ) {
+                    var nextArrayPos = self.arrayPos + 1;
+                    if ( nextArrayPos >= self.strings.length ) {
+                        nextArrayPos = 0;
+                    }
+                    var afterDelayString = (self.strings[ nextArrayPos ].split('^800').join('')).substr(0, curStrPos);
+                    console.log(nextString);
+                    console.log(afterDelayString);
+                    console.log("");
+                    if ( nextString == afterDelayString ) {
+                        self.stopNum = curStrPos;
+                        self.strPos = curStrPos;
+                    } else {
+                        self.stopNum = 0;
+                    }
+                }
+
                 if (self.attr) {
                     self.el.attr(self.attr, nextString);
                 } else {
@@ -326,8 +346,9 @@
                         if(self.shuffle) self.sequence = self.shuffleArray(self.sequence);
 
                         self.init();
-                    } else
-                        self.typewrite(self.strings[self.sequence[self.arrayPos]], curStrPos);
+                    } else{
+                      var afterDelayString2 = self.strings[self.sequence[self.arrayPos]].split('^800').join('');
+                        self.typewrite(afterDelayString2, curStrPos);}
                 }
 
                 // humanized value for typing
@@ -374,7 +395,7 @@
             var self = this;
             clearInterval(self.timeout);
             var id = this.el.attr('id');
-            this.el.after('<span id="' + id + '"/>')
+            this.el.after('<span id="' + id + '"/>');
             this.el.remove();
             if (typeof this.cursor !== 'undefined') {
                 this.cursor.remove();
